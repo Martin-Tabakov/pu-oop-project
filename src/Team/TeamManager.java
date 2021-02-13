@@ -1,8 +1,8 @@
 package Team;
 
 public class TeamManager {
-    Team north;
-    Team south;
+    public Team north;
+    public Team south;
 
     public TeamManager() {
         this.north = new Team(Side.North);

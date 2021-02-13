@@ -1,6 +1,7 @@
 package Board;
 
 import Utility.Place;
+
 import java.util.ArrayList;
 
 public class Board {
@@ -15,10 +16,36 @@ public class Board {
         this.setTiles();
     }
 
+    public int getWidth() {
+        return width;
+    }
+
+    public int getHeight() {
+        return height;
+    }
+
     private void setTiles() {
-        for(int i = 0; i < this.height; ++i) {
-            for(int j = 0; j < this.width; ++j) {
-                this.tiles.add(new Tile(new Place(i, j)));
+        for (int row = 0; row < 2; row++) {
+            for (int col = 0; col < width; col++) {
+                if (row % 2 == 0)
+                    tiles.add((col % 2 == 0) ? new Tile(new Place(row, col), Type.Castle) : new Tile(new Place(row, col), Type.Castle2));
+                if (row % 2 != 0)
+                    tiles.add((col % 2 != 0) ? new Tile(new Place(row, col), Type.Castle) : new Tile(new Place(row, col), Type.Castle2));
+            }
+        }
+
+        for (int row = 2; row < height-2; row++) {
+            for (int col = 0; col < width; col++) {
+                    tiles.add(new Tile(new Place(row, col), Type.Field));
+            }
+        }
+
+        for (int row = height-2; row < height; row++) {
+            for (int col = 0; col < width; col++) {
+                if (row % 2 == 0)
+                    tiles.add((col % 2 == 0) ? new Tile(new Place(row, col), Type.Castle) : new Tile(new Place(row, col), Type.Castle2));
+                if (row % 2 != 0)
+                    tiles.add((col % 2 != 0) ? new Tile(new Place(row, col), Type.Castle) : new Tile(new Place(row, col), Type.Castle2));
             }
         }
 

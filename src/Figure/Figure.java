@@ -11,6 +11,14 @@ public abstract class Figure {
     private Place placement;
     private String symbols;
 
+    public String getSymbols() {
+        return symbols;
+    }
+
+    public Place getPlacement() {
+        return placement;
+    }
+
     protected Figure(int attackDmg, int armor, int health, int attackRange, int speed, Place placement, String symbols) {
         this.attackDmg = attackDmg;
         this.armor = armor;
