@@ -28,4 +28,9 @@ public abstract class Figure {
         this.placement = placement;
         this.symbols = symbols;
     }
+
+    public boolean hasSamePos(Place f){
+        return this.placement.getColumn() == f.getColumn() &&
+                this.placement.getRow() == f.getRow();
+    }
 }

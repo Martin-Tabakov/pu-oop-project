@@ -8,7 +8,8 @@ public enum Colors {
     castle(new Color(74, 55, 55)),
     castle2(new Color(224, 225, 192)),
     field(new Color(237, 235, 227)),
-    blockade(new Color(126, 13, 24));
+    placeable(new Color(74, 217, 69)),
+    obstacle(new Color(217, 69, 69));
     public Color value;
 
     Colors(Color c) {

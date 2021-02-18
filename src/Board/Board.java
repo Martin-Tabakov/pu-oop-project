@@ -36,7 +36,8 @@ public class Board {
 
         for (int row = 2; row < height-2; row++) {
             for (int col = 0; col < width; col++) {
-                    tiles.add(new Tile(new Place(row, col), Type.Field));
+                if(row == 2 && (col >0 && col<3)) tiles.add(new Tile(new Place(row,col), Type.Obstacle));
+                else tiles.add(new Tile(new Place(row, col), Type.Field));
             }
         }
 
