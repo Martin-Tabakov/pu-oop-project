@@ -19,6 +19,10 @@ public abstract class Figure {
         return placement;
     }
 
+    public void setPlacement(Place placement) {
+        this.placement = placement;
+    }
+
     protected Figure(int attackDmg, int armor, int health, int attackRange, int speed, Place placement, String symbols) {
         this.attackDmg = attackDmg;
         this.armor = armor;
@@ -32,5 +36,11 @@ public abstract class Figure {
     public boolean hasSamePos(Place f){
         return this.placement.getColumn() == f.getColumn() &&
                 this.placement.getRow() == f.getRow();
+    }
+
+
+    @Override
+    public String toString() {
+        return String.format("%s row: %d, col: %d",symbols,placement.getRow(),placement.getColumn());
     }
 }

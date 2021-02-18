@@ -24,4 +24,14 @@ public class Place {
     public void setColumn(int column) {
         this.column = column;
     }
+
+    public boolean hasSamePos(Place f){
+        return column == f.getColumn() &&
+                row == f.getRow();
+    }
+
+    @Override
+    public String toString() {
+        return  String.format("row: %d col: %d",row,column);
+    }
 }

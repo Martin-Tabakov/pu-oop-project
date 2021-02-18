@@ -23,6 +23,9 @@ public class Board {
     public int getHeight() {
         return height;
     }
+    public Place normalizePlace(Place p){
+        return new Place(p.getRow()-Tile.height,p.getColumn()-Tile.width);
+    }
 
     private void setTiles() {
         for (int row = 0; row < 2; row++) {
