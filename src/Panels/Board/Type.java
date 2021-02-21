@@ -1,4 +1,4 @@
-package Board;
+package Panels.Board;
 
 public enum Type {
     Field,

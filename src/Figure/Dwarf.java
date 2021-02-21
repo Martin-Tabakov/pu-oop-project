@@ -1,10 +1,10 @@
 
 package Figure;
 
-import Utility.Place;
+import Utility.Spot;
 
 public class Dwarf extends Figure {
-    public Dwarf(Place place) {
-        super(6, 2, 12, 2, 2, place,"D");
+    public Dwarf(Spot spot) {
+        super(6, 2, 12, 2, 2, spot,"D");
     }
 }

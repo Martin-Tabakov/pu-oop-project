@@ -1,4 +1,4 @@
-package UI;
+package Panels;
 
 import Figure.*;
 import Team.*;
@@ -6,13 +6,12 @@ import Utility.*;
 
 import java.util.ArrayList;
 
-public class FigureHolder {
+public class FigureHolder extends Panel {
 
-    private final Place place;
     private Team currentPlacer;
 
-    public FigureHolder(Place place,Team currentPlacer){
-        this.place = place;
+    public FigureHolder(Spot position,Spot size, Team currentPlacer){
+        super(position,size);
         this.currentPlacer = currentPlacer;
     }
 
@@ -25,9 +24,9 @@ public class FigureHolder {
     }
     public ArrayList<Pair<Figure,Integer>> getPlacedFigures(){
 
-        Dwarf d = new Dwarf(new Place(1, 0));
-        Knight k = new Knight(new Place(1, 1));
-        Elf e = new Elf(new Place(1, 2));
+        Dwarf d = new Dwarf(new Spot(1, 0));
+        Knight k = new Knight(new Spot(1, 1));
+        Elf e = new Elf(new Spot(1, 2));
 
         ArrayList<Pair<Figure,Integer>> totals = new ArrayList<>();
 
@@ -44,13 +43,5 @@ public class FigureHolder {
             if (fig.getSymbols().equals(f.getSymbols())) occ++;
         }
         return occ;
-    }
-
-    public Place getPlace() {
-        return place;
-    }
-
-    public Place normalizePlace(Place p){
-        return new Place(p.getRow()-place.getRow(),p.getColumn()-place.getColumn());
     }
 }

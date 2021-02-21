@@ -9,7 +9,7 @@ public class Team {
 
     private final Side side;
     private ArrayList<Figure> figures;
-    private ArrayList<Place> placeableTiles;
+    private ArrayList<Spot> placeableTiles;
 
     private int totalFigures = 6;
 
@@ -21,7 +21,7 @@ public class Team {
         return figures;
     }
 
-    public ArrayList<Place> getPlaceableTiles() {
+    public ArrayList<Spot> getPlaceableTiles() {
         return placeableTiles;
     }
 
@@ -39,11 +39,11 @@ public class Team {
         int row = (side == Side.North) ? 0 : boardHeight - 2;
         for (int i = row; i < row + 2; i++) {
             for (int j = 0; j < boardWidth; j++) {
-                placeableTiles.add(new Place(i,j));
+                placeableTiles.add(new Spot(i,j));
             }
         }
     }
-    public void addFig(Place click, Pair<Figure, Integer> figData,Place toRemove){
+    public void addFig(Spot click, Pair<Figure, Integer> figData, Spot toRemove){
         placeableTiles.remove(toRemove);
         Figure f = figData.getKey();
         f.setPlacement(click);
@@ -51,7 +51,7 @@ public class Team {
         figures.add(f);
     }
 
-    public boolean hasFigureOnPos(Place p){
+    public boolean hasFigureOnPos(Spot p){
         for (Figure f: figures) {
             if(f.hasSamePos(p)) return true;
         }

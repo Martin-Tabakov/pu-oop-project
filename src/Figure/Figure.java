@@ -1,6 +1,6 @@
 package Figure;
 
-import Utility.Place;
+import Utility.Spot;
 
 public abstract class Figure {
     private final int attackDmg;
@@ -8,22 +8,22 @@ public abstract class Figure {
     private int health;
     private final int speed;
     private final int armor;
-    private Place placement;
+    private Spot placement;
     private String symbols;
 
     public String getSymbols() {
         return symbols;
     }
 
-    public Place getPlacement() {
+    public Spot getPlacement() {
         return placement;
     }
 
-    public void setPlacement(Place placement) {
+    public void setPlacement(Spot placement) {
         this.placement = placement;
     }
 
-    protected Figure(int attackDmg, int armor, int health, int attackRange, int speed, Place placement, String symbols) {
+    protected Figure(int attackDmg, int armor, int health, int attackRange, int speed, Spot placement, String symbols) {
         this.attackDmg = attackDmg;
         this.armor = armor;
         this.health = health;
@@ -33,14 +33,14 @@ public abstract class Figure {
         this.symbols = symbols;
     }
 
-    public boolean hasSamePos(Place f){
-        return this.placement.getColumn() == f.getColumn() &&
-                this.placement.getRow() == f.getRow();
+    public boolean hasSamePos(Spot f){
+        return this.placement.getWidth() == f.getWidth() &&
+                this.placement.getHeight() == f.getHeight();
     }
 
 
     @Override
     public String toString() {
-        return String.format("%s row: %d, col: %d",symbols,placement.getRow(),placement.getColumn());
+        return String.format("%s row: %d, col: %d",symbols,placement.getHeight(),placement.getWidth());
     }
 }

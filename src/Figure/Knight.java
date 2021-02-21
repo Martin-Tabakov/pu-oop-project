@@ -1,9 +1,9 @@
 package Figure;
 
-import Utility.Place;
+import Utility.Spot;
 
 public class Knight extends Figure {
-    public Knight(Place place) {
-        super(8, 3, 15, 1, 1, place,"K");
+    public Knight(Spot spot) {
+        super(8, 3, 15, 1, 1, spot,"K");
     }
 }
