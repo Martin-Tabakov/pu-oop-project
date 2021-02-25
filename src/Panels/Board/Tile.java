@@ -1,5 +1,6 @@
 package Panels.Board;
 
+import Figure.Figure;
 import Utility.Spot;
 
 public class Tile {
@@ -8,9 +9,18 @@ public class Tile {
 
     private final Spot pos;
     private final Type type;
+    private Figure placedFig;
 
     public Spot getPos() {
         return pos;
+    }
+
+    public Figure getPlacedFig() {
+        return placedFig;
+    }
+
+    public void setPlacedFig(Figure placedFig) {
+        this.placedFig = placedFig;
     }
 
     public Type getType() {
@@ -20,6 +30,7 @@ public class Tile {
     public Tile(Spot pos, Type type) {
         this.pos = pos;
         this.type = type;
+        this.placedFig = null;
     }
 
     public static void changeSize( int tileHeight,int tileWidth) {

@@ -4,15 +4,15 @@ import Figure.Figure;
 import Team.Side;
 
 public class Heal extends Entry {
-    int hpRegenerated;
+    int currentHP;
 
-    public Heal(int turn, Side perpetrator, Figure figure, int hpRegenerated) {
+    public Heal(int turn, Side perpetrator, Figure figure, int currentHP) {
         super(turn, perpetrator, figure);
-        this.hpRegenerated = hpRegenerated;
+        this.currentHP = currentHP;
     }
 
     @Override
     public String toString() {
-        return String.format("Turn %d: %s %s Healed for %d hp", turn, perpetrator, figure, hpRegenerated);
+        return String.format("Turn %d: %s %s Healed to %d hp", turn, perpetrator, figure, currentHP);
     }
 }

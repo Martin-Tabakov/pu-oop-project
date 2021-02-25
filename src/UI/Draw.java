@@ -6,10 +6,13 @@ import Figure.*;
 import Panels.Log.Entry;
 import Panels.Log.Log;
 import Team.*;
+import Utility.Pair;
 import Utility.Spot;
 
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 
 public class Draw {
     private Graphics g;
@@ -26,7 +29,8 @@ public class Draw {
         g.setColor(getTileColor(Type.Castle));
         g.drawRect(board.getPixelPosW(), board.getPixelPosH(), board.getPixelW(), board.getPixelH());
 
-        for (Tile tile : board.tiles) {
+        for (Tile[] row : board.tiles) {
+            for (Tile tile : row)
             drawTile(tile, board.getPosition());
         }
     }
@@ -60,19 +64,19 @@ public class Draw {
 
     public void drawFigureHolder(FigureHolder fh, Spot boardPosition) {
         g.setColor(getTileColor(Type.Castle2));
-        g.fillRect(fh.getPixelPosW()+1, fh.getPixelPosH()+1, fh.getPixelW() - 1, fh.getPixelH() - 1);
+        g.fillRect(fh.getPixelPosW() + 1, fh.getPixelPosH() + 1, fh.getPixelW() - 1, fh.getPixelH() - 1);
         g.setColor(getTileColor(Type.Castle));
         g.drawRect(fh.getPixelPosW(), fh.getPixelPosH(), fh.getPixelW(), fh.getPixelH());
 
         if (fh.getCurrentPlacer() != null) {
             drawFiguresInHolder(fh);
-            drawPlaceableTiles(fh,boardPosition);
+            drawPlaceableTiles(fh, boardPosition);
         }
     }
 
     private void drawFiguresInHolder(FigureHolder fh) {
         g.setColor(getNationCol(fh.getCurrentPlacer().getSide()));
-        g.drawString("Heroes", fh.getPixelPosW()+(int) (Tile.width / 1.5),fh.getPixelPosH ()+(int) (Tile.height / 1.5));
+        g.drawString("Heroes", fh.getPixelPosW() + (int) (Tile.width / 1.5), fh.getPixelPosH() + (int) (Tile.height / 1.5));
 
         drawTile(new Tile(new Spot(1, 0), Type.Castle), fh.getPosition());
         drawTile(new Tile(new Spot(1, 1), Type.Castle2), fh.getPosition());
@@ -82,7 +86,7 @@ public class Draw {
 
             if (fh.getPlacedFigures().get(i).getValue() < 2) {
                 int coordX = Tile.width * i + Tile.width / 3 + fh.getPixelPosW();
-                int coordY = Tile.height + (int) (Tile.height / 1.5)+ fh.getPixelPosH();
+                int coordY = Tile.height + (int) (Tile.height / 1.5) + fh.getPixelPosH();
 
                 g.setColor(getNationCol(fh.getCurrentPlacer().getSide()));
                 g.drawString(fh.getPlacedFigures().get(i).getKey().getSymbols(), coordX, coordY);
@@ -90,10 +94,10 @@ public class Draw {
         }
     }
 
-    private void drawPlaceableTiles(FigureHolder fh,Spot boardPosition) {
+    private void drawPlaceableTiles(FigureHolder fh, Spot boardPosition) {
 
         for (Spot p : fh.getCurrentPlacer().getPlaceableTiles()) {
-            drawTile(p, Type.Placeable,boardPosition);
+            drawTile(p, Type.Placeable, boardPosition);
         }
     }
 
@@ -104,7 +108,7 @@ public class Draw {
         g.fillRect((tile.getPos().getWidth() + parentPosition.getWidth()) * Tile.width + 1, (tile.getPos().getHeight() + parentPosition.getHeight()) * Tile.height + 1, Tile.width - 1, Tile.height - 1);
     }
 
-    private void drawTile(Spot p, Type t,Spot parentPosition) {
+    private void drawTile(Spot p, Type t, Spot parentPosition) {
 
         g.setColor(getTileColor(t));
         g.fillRect((p.getWidth() + parentPosition.getWidth()) * Tile.width + 1, (p.getHeight() + parentPosition.getHeight()) * Tile.height + 1, Tile.width - 1, Tile.height - 1);
@@ -116,14 +120,32 @@ public class Draw {
         g.setColor(getTileColor(Type.Castle));
         g.drawRect(log.getPixelPosW(), log.getPixelPosH(), log.getPixelW(), log.getPixelH());
         g.drawString("Log", log.getPixelPosW() + 10, log.getPixelPosH() + (int) (Tile.height / 1.5));
-        g.drawLine(log.getPixelPosW(), log.getPixelPosH()+Tile.height, log.getPixelPosW()+log.getPixelW(), log.getPixelPosH()+Tile.height);
+        g.drawLine(log.getPixelPosW(), log.getPixelPosH() + Tile.height, log.getPixelPosW() + log.getPixelW(), log.getPixelPosH() + Tile.height);
 
         Font f = g.getFont();
         g.setFont(new Font("Arial", Font.PLAIN, Math.min(Tile.height, Tile.width) / 6));
 
         ArrayList<Entry> entries = log.getEvents(3);
         for (int i = 0; i < entries.size(); i++) {
-            g.drawString(entries.get(i).toString(),log.getPixelPosW()+Tile.width / 10, log.getPixelPosH()+Tile.height + (Tile.height / 2) * (i + 1));
+            g.drawString(entries.get(i).toString(), log.getPixelPosW() + Tile.width / 10, log.getPixelPosH() + Tile.height + (Tile.height / 2) * (i + 1));
+        }
+        g.setFont(f);
+    }
+
+    public void drawActionMenu(ActionMenu am,Side side) {
+        g.setColor(getTileColor(Type.Castle2));
+        g.fillRect(am.getPixelPosW() + 1, am.getPixelPosH() + 1, am.getPixelW() - 1, am.getPixelH() - 1);
+        g.setColor(getTileColor(Type.Castle));
+        g.drawRect(am.getPixelPosW(), am.getPixelPosH(), am.getPixelW(), am.getPixelH());
+        g.setColor(getNationCol(side));
+        g.drawString("Attack", am.getPixelPosW() + 10, am.getPixelPosH() + (int) (Tile.height / 1.5));
+        g.drawString("Move", am.getPixelPosW() + 10, am.getPixelPosH() + (int) (Tile.height / 1.5) + Tile.height);
+        g.drawString("Heal", am.getPixelPosW() + 10, am.getPixelPosH() + (int) (Tile.height / 1.5)+Tile.height * 2);
+    }
+
+    public void drawMoveToPlaces(LinkedList<Pair<Spot,Integer>> spots, Spot parentPos){
+        for (Pair<Spot,Integer> p : spots) {
+            drawTile(p.getKey(), Type.Placeable,parentPos);
         }
     }
 }
