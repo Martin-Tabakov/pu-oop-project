@@ -12,7 +12,6 @@ import Utility.Spot;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.LinkedList;
-import java.util.List;
 
 public class Draw {
     private Graphics g;
@@ -29,10 +28,9 @@ public class Draw {
         g.setColor(getTileColor(Type.Castle));
         g.drawRect(board.getPixelPosW(), board.getPixelPosH(), board.getPixelW(), board.getPixelH());
 
-        for (Tile[] row : board.tiles) {
-            for (Tile tile : row)
-            drawTile(tile, board.getPosition());
-        }
+        for(int row=0;row<board.getSize().getHeight();row++)
+        for(int col=0;col<board.getSize().getWidth();col++)
+            drawTile(board.getTile(row,col), board.getPosition());
     }
 
     public void drawTeam(Team team, Spot boardPosition) {
@@ -146,6 +144,25 @@ public class Draw {
     public void drawMoveToPlaces(LinkedList<Pair<Spot,Integer>> spots, Spot parentPos){
         for (Pair<Spot,Integer> p : spots) {
             drawTile(p.getKey(), Type.Placeable,parentPos);
+        }
+    }
+
+    public void drawPointsDisplay(PointsDisplay pd,Team t, Team t2){
+        g.setColor(getTileColor(Type.Castle2));
+        g.fillRect(pd.getPixelPosW() + 1, pd.getPixelPosH() + 1, pd.getPixelW() - 1, pd.getPixelH() - 1);
+        g.setColor(getTileColor(Type.Castle));
+        g.drawRect(pd.getPixelPosW(), pd.getPixelPosH(), pd.getPixelW(), pd.getPixelH());
+
+        g.drawString("Points", pd.getPixelPosW() + 10, pd.getPixelPosH() + (int) (Tile.height / 1.5));
+        g.setColor(getNationCol(t.getSide()));
+        g.drawString(String.valueOf(t.getPoints()), pd.getPixelPosW() + 10, pd.getPixelPosH() + (int) (Tile.height / 1.5) + Tile.height);
+        g.setColor(getNationCol(t2.getSide()));
+        g.drawString(String.valueOf(t2.getPoints()), pd.getPixelPosW() + 10, pd.getPixelPosH() + (int) (Tile.height / 1.5)+Tile.height * 2);
+    }
+
+    public void drawAttackablePlaces(ArrayList<Spot> attackablePlaces, Spot position) {
+        for (Spot s : attackablePlaces) {
+            drawTile(s, Type.Placeable,position);
         }
     }
 }

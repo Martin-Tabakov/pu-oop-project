@@ -1,5 +1,6 @@
 package Utility;
 
+import Panels.Board.Tile;
 import Panels.Panel;
 
 public class Spot {
@@ -32,13 +33,22 @@ public class Spot {
                 height == f.getHeight();
     }
 
-    public Spot add(Spot toAdd){
+    public static boolean areValuesEqual(Spot a,Spot b) {
+        return a.hasEqualValues(b);
+    }
+
+    public Spot addTo(Spot toAdd){
         return new Spot(this.getHeight() + toAdd.getHeight(),this.getWidth()+toAdd.getWidth());
     }
 
     public boolean isInBound(Panel p){
         return this.getHeight()< p.getSize().getHeight() && this.getWidth()< p.getSize().getWidth() &&
                 this.getWidth()>-1 && this.getHeight()>-1;
+    }
+    public static Spot convertToPos(Spot p) {
+        if(p.getWidth()<0) p.setWidth(-Tile.width);
+        if(p.getHeight()<0) p.setWidth(-Tile.height);
+        return new Spot(p.getHeight() / Tile.height, p.getWidth() / Tile.width);
     }
 
     @Override

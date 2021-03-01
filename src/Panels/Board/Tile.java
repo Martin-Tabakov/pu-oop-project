@@ -37,10 +37,4 @@ public class Tile {
         width = tileWidth;
         height = tileHeight;
     }
-
-    public static Spot convertToPos(Spot p) {
-        if(p.getWidth()<0) p.setWidth(-Tile.width);
-        if(p.getHeight()<0) p.setWidth(-Tile.height);
-        return new Spot(p.getHeight() / height, p.getWidth() / width);
-    }
 }

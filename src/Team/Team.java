@@ -2,6 +2,7 @@ package Team;
 
 import Figure.*;
 import Panels.Board.Board;
+import Panels.Board.Type;
 import Utility.*;
 
 import java.util.ArrayList;
@@ -11,10 +12,15 @@ import java.util.Queue;
 public class Team {
 
     private final Side side;
-    private ArrayList<Figure> figures;
+    private final ArrayList<Figure> figures;
     private ArrayList<Spot> placeableTiles;
 
-    private int totalFigures = 6;
+    private final int totalFigures = 6;
+    private final int points = 0;
+
+    public int getPoints() {
+        return points;
+    }
 
     public int getTotalFigures() {
         return totalFigures;
@@ -58,26 +64,95 @@ public class Team {
     public Figure getFigureOnPos(Spot s) {
 
         for (Figure f : figures) {
-            if (f.hasSamePos(s)) return f;
+            if (Spot.areValuesEqual(f.getPlacement(),s)) return f;
         }
         return null;
     }
 
     public boolean hasFigureOnPos(Spot p) {
         for (Figure f : figures) {
-            if (f.hasSamePos(p)) return true;
+            if (Spot.areValuesEqual(f.getPlacement(),p)) return true;
         }
         return false;
     }
 
-    public boolean attackFig(Figure f) {
-        if (!selectedDest) {
-            selectedDest = true;
+    public boolean markTargets = false;
+    private ArrayList<Spot> attackablePlaces = null;
+
+    public ArrayList<Spot> getAttackablePlaces(){
+        return attackablePlaces;
+    }
+
+    public void resetAttackablePlaces(){
+        attackablePlaces = null;
+    }
+
+    public boolean attackFig(Figure f,Spot attackedSpot,Board board, Team enemyTeam) {
+        if (!markTargets) {
+            markPossibleTargets(f, board, enemyTeam);
+            markTargets = true;
             return false;
         }
 
-        selectedDest = false;
-        return f.attack();
+        if (attackablePlaces.stream().anyMatch(o -> o.hasEqualValues(attackedSpot))) {
+            Figure attackedFig = enemyTeam.getFigureOnPos(attackedSpot);
+            int diceTotals = Dice.throwDice(1,6) + Dice.throwDice(1,6) + Dice.throwDice(1,6);
+            int damageDealt;
+            if(diceTotals == attackedFig.getHealth()) damageDealt = 1110;
+            else if(diceTotals == 3) damageDealt = f.getAttackDmg()/2;
+            else damageDealt = f.getAttackDmg()- attackedFig.getArmor();
+
+            markTargets = false;
+            if(enemyTeam.getFigureOnPos(attackedSpot).attack(damageDealt))
+            {
+                board.getTile(attackedSpot).setPlacedFig(null);
+                enemyTeam.figures.remove(attackedFig);
+            }
+            return true;
+        }
+        return false;
+    }
+
+    private void markPossibleTargets(Figure f,Board board, Team enemyTeam){
+        //TODO Include elf attack
+        attackablePlaces = new ArrayList<>();
+        for(int i=1;i<= f.getAttackRange();i++)
+        {
+            Spot newSpot = new Spot(f.getPlacement().getHeight()+i,f.getPlacement().getWidth());
+            if(!newSpot.isInBound(board) || board.getTile(newSpot).getType() == Type.Obstacle) break;
+            if(enemyTeam.getFigures().stream().anyMatch( o -> Spot.areValuesEqual(o.getPlacement(),newSpot))){
+                attackablePlaces.add(newSpot);
+                break;
+            }
+
+        }for(int i=1;i<= f.getAttackRange();i++)
+        {
+            Spot newSpot = new Spot(f.getPlacement().getHeight(),f.getPlacement().getWidth()+i);
+            if(!newSpot.isInBound(board) || board.getTile(newSpot).getType() == Type.Obstacle) break;
+            if(enemyTeam.getFigures().stream().anyMatch( o -> Spot.areValuesEqual(o.getPlacement(),newSpot))){
+                attackablePlaces.add(newSpot);
+                break;
+            }
+
+        }for(int i=1;i<= f.getAttackRange();i++)
+        {
+            Spot newSpot = new Spot(f.getPlacement().getHeight()-i,f.getPlacement().getWidth());
+            if(!newSpot.isInBound(board) || board.getTile(newSpot).getType() == Type.Obstacle) break;
+            if(enemyTeam.getFigures().stream().anyMatch( o -> Spot.areValuesEqual(o.getPlacement(),newSpot))){
+                attackablePlaces.add(newSpot);
+                break;
+            }
+
+        }for(int i=1;i<= f.getAttackRange();i++)
+        {
+            Spot newSpot = new Spot(f.getPlacement().getHeight(),f.getPlacement().getWidth()-i);
+            if(!newSpot.isInBound(board) || board.getTile(newSpot).getType() == Type.Obstacle) break;
+            if(enemyTeam.getFigures().stream().anyMatch( o -> Spot.areValuesEqual(o.getPlacement(),newSpot))){
+                attackablePlaces.add(newSpot);
+                break;
+            }
+
+        }
     }
 
     boolean selectedDest = false;
@@ -88,7 +163,7 @@ public class Team {
             selectedDest = true;
             return false;
         }
-        if (visitedPlaces.stream().anyMatch(o -> o.getKey().hasEqualValues(f.getPlacement()))) {
+        if (visitedPlaces.stream().anyMatch(o -> o.getKey().hasEqualValues(moveToPos))) {
             selectedDest = false;
             return f.move(moveToPos);
         }
@@ -105,8 +180,7 @@ public class Team {
 
     LinkedList<Pair<Spot, Integer>> visitedPlaces = null;
     public void fillVisitedPlaces(Figure f, Board board) {
-        //TODO Check if the selected tile is clear and the selected figure can be moved there
-        //TODO 2 Include impassable tiles in the search
+        //TODO 3 Include Elf movement
         Queue<Pair<Spot, Integer>> toVisit = new LinkedList<>();
         visitedPlaces = new LinkedList<>();
         toVisit.add(new Pair<>(f.getPlacement(), 1));
@@ -123,10 +197,10 @@ public class Team {
             toVisit.remove();
             visitedPlaces.add(new Pair<>(currentSpot.getKey(), currentSpot.getValue()));
 
-            for (int i = 0; i < neighbors.size(); i++) {
+            for (Spot neighbor : neighbors) {
                 Spot currentN;
-                if ((currentN = currentSpot.getKey().add(neighbors.get(i))) != null && currentN.isInBound(board)) {
-                    if (board.tiles[currentN.getHeight()][currentN.getWidth()].getPlacedFig() == null && currentSpot.getValue() <= f.getSpeed())
+                if ((currentN = currentSpot.getKey().addTo(neighbor)) != null && currentN.isInBound(board)) {
+                    if (board.getTile(currentN.getHeight(),currentN.getWidth()).getPlacedFig() == null && currentSpot.getValue() <= f.getSpeed() && board.getTile(currentN.getHeight(),currentN.getWidth()).getType() != Type.Obstacle)
                         if (visitedPlaces.stream().noneMatch(a -> a.getKey().hasEqualValues(currentN))) {
                             toVisit.add(new Pair<>(currentN, currentSpot.getValue() + 1));
                         }
@@ -136,6 +210,9 @@ public class Team {
     }
 
     public boolean healFig(Figure f, int healthRegen) {
-        return f.heal(healthRegen);
+        if(f.getMaxHealth() == f.getHealth()) return false;
+        f.heal(healthRegen);
+        if(f.getHealth()> f.getMaxHealth()) f.setHealth(f.getMaxHealth());
+        return true;
     }
 }

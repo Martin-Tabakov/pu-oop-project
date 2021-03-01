@@ -10,10 +10,26 @@ public abstract class Figure {
     private final int speed;
     private final int armor;
     private Spot placement;
-    private String symbols;
+    private final String symbols;
 
     public int getSpeed() {
         return speed;
+    }
+
+    public int getAttackDmg() {
+        return attackDmg;
+    }
+
+    public int getArmor() {
+        return armor;
+    }
+
+    public int getMaxHealth() {
+        return maxHealth;
+    }
+
+    public int getAttackRange() {
+        return attackRange;
     }
 
     public String getSymbols() {
@@ -26,6 +42,10 @@ public abstract class Figure {
 
     public int getHealth() {
         return health;
+    }
+
+    public void setHealth(int health) {
+        this.health = health;
     }
 
     public void setPlacement(Spot placement) {
@@ -43,12 +63,9 @@ public abstract class Figure {
         this.symbols = symbols;
     }
 
-    public boolean hasSamePos(Spot f) {
-        return placement.hasEqualValues(f);
-    }
-
-    public boolean attack() {
-        return true;
+    public boolean attack(int damageDealt) {
+        this.health-= damageDealt;
+        return health <= 0;
     }
 
     public boolean move(Spot moveToPos) {
@@ -57,9 +74,7 @@ public abstract class Figure {
     }
 
     public boolean heal(int healthRegen) {
-        if(maxHealth == health) return false;
         this.health += healthRegen;
-        if(health>maxHealth) health = maxHealth;
         return true;
     }
 

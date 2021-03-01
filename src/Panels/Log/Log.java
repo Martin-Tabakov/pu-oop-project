@@ -9,7 +9,7 @@ import java.util.Collections;
 public class Log extends Panel {
 
     private int rounds;
-    private ArrayList<Entry> entries;
+    private final ArrayList<Entry> entries;
 
     public Log(Spot spot, Spot size) {
         super(spot, size);

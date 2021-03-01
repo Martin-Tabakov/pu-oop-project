@@ -25,6 +25,7 @@ public class MainWindow extends JFrame implements MouseListener {
     FigureHolder figureHolder;
     ActionMenu actionMenu;
     Log log;
+    PointsDisplay pointsDisplay;
 
     Spot clickfh = null;
     Spot clickb = null;
@@ -48,6 +49,7 @@ public class MainWindow extends JFrame implements MouseListener {
         this.figureHolder = new FigureHolder(new Spot(1, width + 2), new Spot(2, 3), north);
         this.actionMenu = new ActionMenu(new Spot(1, width + 2), new Spot(3, 2));
         this.log = new Log(new Spot(height - 2, width + 2), new Spot(3, 5));
+        this.pointsDisplay = new PointsDisplay(new Spot(1, width + 5), new Spot(3, 2));
 
         this.draw = new Draw();
         this.setSize(windowWidth, windowHeight);
@@ -64,13 +66,20 @@ public class MainWindow extends JFrame implements MouseListener {
         draw.drawTeam(south, board.getPosition());
         draw.drawLogWindow(log);
 
-        if(currentPlayer.getVisitedPlaces() != null) draw.drawMoveToPlaces(currentPlayer.getVisitedPlaces(),board.getPosition());
+        if (currentPlayer.getVisitedPlaces() != null)
+            draw.drawMoveToPlaces(currentPlayer.getVisitedPlaces(), board.getPosition());
+        if (currentPlayer.getAttackablePlaces() != null)
+            draw.drawAttackablePlaces(currentPlayer.getAttackablePlaces(), board.getPosition());
 
         if (!bothPlayersPlaced) draw.drawFigureHolder(figureHolder, board.getPosition());
-        else draw.drawActionMenu(actionMenu, currentPlayer.getSide());
+        else {
+            draw.drawActionMenu(actionMenu, currentPlayer.getSide());
+            draw.drawPointsDisplay(pointsDisplay, north, south);
+        }
     }
-//region Figure placement phase
-    public Pair<Figure, Integer> getFigureToPlace(Spot click) {
+
+    //region Figure placement phase
+    public Pair<Figure, Integer> getFigureToPlace() {
         boolean isNorthFull = north.getFigures().size() == north.getTotalFigures();
         boolean isSouthFull = south.getFigures().size() == south.getTotalFigures();
         if (isNorthFull && isSouthFull) bothPlayersPlaced = true;
@@ -82,7 +91,7 @@ public class MainWindow extends JFrame implements MouseListener {
 
         ArrayList<Pair<Figure, Integer>> totals = figureHolder.getPlacedFigures();
         for (int i = 0; i < 3; i++) {
-            if (totals.get(i).getKey().hasSamePos(click) && totals.get(i).getValue() < 2) {
+            if (Spot.areValuesEqual(totals.get(i).getKey().getPlacement(), clickfh) && totals.get(i).getValue() < 2) {
                 toReturn = totals.get(i);
                 System.out.println("Clicked on valid option" + totals.get(i).getKey().getSymbols());
             }
@@ -94,7 +103,7 @@ public class MainWindow extends JFrame implements MouseListener {
         for (Spot p : currentPlayer.getPlaceableTiles()) {
             if (p.hasEqualValues(clickb)) {
                 currentPlayer.addFig(clickb, figData, p);
-                board.tiles[clickb.getHeight()][clickb.getWidth()].setPlacedFig(figData.getKey());
+                board.getTile(clickb.getHeight(), clickb.getWidth()).setPlacedFig(figData.getKey());
                 log.addEvent(new PlaceFig(log.getRounds(), currentPlayer.getSide(), figData.getKey()));
                 log.countRound();
                 isNorthPlacing = !isNorthPlacing;
@@ -106,9 +115,10 @@ public class MainWindow extends JFrame implements MouseListener {
 
     private void figurePlacing() {
         if (figData != null) placeFigure();
-        if (figData == null) figData = getFigureToPlace(clickfh);
+        if (figData == null) figData = getFigureToPlace();
     }
-//endregion
+
+    //endregion
     String selectedAction = null;
 
     private void playGame() {
@@ -117,7 +127,7 @@ public class MainWindow extends JFrame implements MouseListener {
             selectedAction = actionMenu.getAction(clickam);
             return;
         }
-        if (selectedAction != null) doAction();
+        doAction();
     }
 
     Figure doer = null;
@@ -128,18 +138,27 @@ public class MainWindow extends JFrame implements MouseListener {
         }
         if (doer != null) switch (selectedAction) {
             case "Attack": {
-                if (currentPlayer.attackFig(doer)) {
+                if (currentPlayer.attackFig(doer, clickb, board, waitingPlayer)) {
+                    currentPlayer.resetAttackablePlaces();
+                    currentPlayer.markTargets = false;
                     prepareNextAction();
                     changeCurrentPlayer();
+                }
+                if(currentPlayer.markTargets && currentPlayer.getAttackablePlaces().size() == 0){
+                    currentPlayer.resetAttackablePlaces();
+                    currentPlayer.markTargets = false;
+                    System.out.println("No possible targets!");
+                    prepareNextAction();
                 }
                 break;
             }
             case "Move": {
-                if (currentPlayer.moveFig(doer,clickb,board)) {
-                    Spot initialSpot =  currentPlayer.getVisitedPlaces().getFirst().getKey();
-                    board.tiles[initialSpot.getHeight()][initialSpot.getWidth()].setPlacedFig(null);
-                    board.tiles[clickb.getHeight()][clickb.getWidth()].setPlacedFig(doer);
-                    log.addEvent(new Move(log.getRounds(),currentPlayer.getSide(),doer,clickb));
+                if (currentPlayer.moveFig(doer, clickb, board)) {
+                    Spot initialSpot = currentPlayer.getVisitedPlaces().getFirst().getKey();
+                    board.getTile(initialSpot.getHeight(), initialSpot.getWidth()).setPlacedFig(null);
+                    board.getTile(clickb.getHeight(), clickb.getWidth()).setPlacedFig(doer);
+                    log.addEvent(new Move(log.getRounds(), currentPlayer.getSide(), doer, clickb));
+                    log.countRound();
                     currentPlayer.resetVisited();
                     prepareNextAction();
                     changeCurrentPlayer();
@@ -147,24 +166,25 @@ public class MainWindow extends JFrame implements MouseListener {
                 break;
             }
             case "Heal": {
-                int healthRegen = Dice.throwDice(1,6);
-                if (currentPlayer.healFig(doer,healthRegen)) {
+                int healthRegen = Dice.throwDice(1, 6);
+                if (currentPlayer.healFig(doer, healthRegen)) {
                     System.out.println("Healing regen is :" + healthRegen);
                     log.addEvent(new Heal(log.getRounds(), currentPlayer.getSide(), doer, doer.getHealth()));
 
-                    if(healthRegen%2 == 0) changeCurrentPlayer();
+                    if (healthRegen % 2 == 0) changeCurrentPlayer();
                 }
                 prepareNextAction();
                 break;
             }
         }
     }
-    private void prepareNextAction(){
+
+    private void prepareNextAction() {
         selectedAction = null;
         doer = null;
-
     }
-    private void changeCurrentPlayer(){
+
+    private void changeCurrentPlayer() {
         isNorthPlacing = !isNorthPlacing;
         currentPlayer = (isNorthPlacing) ? north : south;
         waitingPlayer = (!isNorthPlacing) ? north : south;
@@ -189,9 +209,9 @@ public class MainWindow extends JFrame implements MouseListener {
         System.out.println("gbNormalized = " + gbNormalized);
         System.out.println("amNormalized = " + amNormalized);
 
-        clickfh = Tile.convertToPos(fhNormalized);
-        clickb = Tile.convertToPos(gbNormalized);
-        clickam = Tile.convertToPos(amNormalized);
+        clickfh = Spot.convertToPos(fhNormalized);
+        clickb = Spot.convertToPos(gbNormalized);
+        clickam = Spot.convertToPos(amNormalized);
 
         System.out.println("Clicked fh= " + clickfh);
         System.out.println("Clicked gb= " + clickb);
