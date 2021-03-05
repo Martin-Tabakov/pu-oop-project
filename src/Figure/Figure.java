@@ -44,10 +44,6 @@ public abstract class Figure {
         return health;
     }
 
-    public void setHealth(int health) {
-        this.health = health;
-    }
-
     public void setPlacement(Spot placement) {
         this.placement = placement;
     }

@@ -1,10 +1,12 @@
 package UI;
 
+import Panels.ActionMenu.ActionMenu;
 import Panels.Board.*;
-import Panels.*;
 import Figure.*;
-import Panels.Log.Entry;
+import Panels.FigureHolder.FigureHolder;
+import Panels.Log.Entries.Entry;
 import Panels.Log.Log;
+import Panels.PointsDisplay.PointsDisplay;
 import Team.*;
 import Utility.Pair;
 import Utility.Spot;
@@ -123,14 +125,14 @@ public class Draw {
         Font f = g.getFont();
         g.setFont(new Font("Arial", Font.PLAIN, Math.min(Tile.height, Tile.width) / 6));
 
-        ArrayList<Entry> entries = log.getEvents(3);
+        ArrayList<Entry> entries = Log.getEvents(3);
         for (int i = 0; i < entries.size(); i++) {
             g.drawString(entries.get(i).toString(), log.getPixelPosW() + Tile.width / 10, log.getPixelPosH() + Tile.height + (Tile.height / 2) * (i + 1));
         }
         g.setFont(f);
     }
 
-    public void drawActionMenu(ActionMenu am,Side side) {
+    public void drawActionMenu(ActionMenu am, Side side) {
         g.setColor(getTileColor(Type.Castle2));
         g.fillRect(am.getPixelPosW() + 1, am.getPixelPosH() + 1, am.getPixelW() - 1, am.getPixelH() - 1);
         g.setColor(getTileColor(Type.Castle));
@@ -147,7 +149,7 @@ public class Draw {
         }
     }
 
-    public void drawPointsDisplay(PointsDisplay pd,Team t, Team t2){
+    public void drawPointsDisplay(PointsDisplay pd, Team t, Team t2){
         g.setColor(getTileColor(Type.Castle2));
         g.fillRect(pd.getPixelPosW() + 1, pd.getPixelPosH() + 1, pd.getPixelW() - 1, pd.getPixelH() - 1);
         g.setColor(getTileColor(Type.Castle));

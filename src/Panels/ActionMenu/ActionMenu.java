@@ -1,5 +1,6 @@
-package Panels;
+package Panels.ActionMenu;
 
+import Panels.Panel;
 import Utility.Spot;
 
 public class ActionMenu extends Panel {

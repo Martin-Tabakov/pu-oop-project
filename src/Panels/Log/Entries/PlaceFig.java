@@ -1,4 +1,4 @@
-package Panels.Log;
+package Panels.Log.Entries;
 
 import Figure.Figure;
 import Team.Side;
@@ -9,6 +9,6 @@ public class PlaceFig extends Entry{
     }
     @Override
     public String toString() {
-        return String.format("Turn %d: %s %s is placed on the board", turn, perpetrator, figure);
+        return String.format("%s %s is placed on the board", perpetrator, figure);
     }
 }

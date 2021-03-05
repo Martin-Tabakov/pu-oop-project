@@ -1,6 +1,7 @@
-package Panels;
+package Panels.FigureHolder;
 
 import Figure.*;
+import Panels.Panel;
 import Team.*;
 import Utility.*;
 

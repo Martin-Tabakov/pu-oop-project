@@ -1,5 +1,6 @@
 package Panels.Log;
 
+import Panels.Log.Entries.Entry;
 import Panels.Panel;
 import Utility.*;
 
@@ -8,48 +9,34 @@ import java.util.Collections;
 
 public class Log extends Panel {
 
-    private int rounds;
-    private final ArrayList<Entry> entries;
+    private static int rounds = 1;
+    private static boolean fullRound = true;
+    private static final ArrayList<Entry> entries = new ArrayList<>();
 
     public Log(Spot spot, Spot size) {
         super(spot, size);
-        this.rounds = 0;
-        this.entries = new ArrayList<>();
     }
 
-    public int getRounds() {
+    public static int getRounds() {
         return rounds;
     }
 
-    public void countRound() {
-        this.rounds++;
+    public static void countRound() {
+        fullRound = !fullRound;
+        if(!fullRound) return;
+        rounds++;
     }
 
-    public void addEvent(Attack attack) {
-        this.entries.add(attack);
+    public static void addEntry(Entry entry) {
+        entries.add(entry);
     }
 
-    public void addEvent(Move move) {
-        this.entries.add(move);
-    }
-
-    public void addEvent(Heal heal) {
-        this.entries.add(heal);
-    }
-
-    public void addEvent(Death death) {
-        this.entries.add(death);
-    }
-    public void addEvent(PlaceFig placeFig) {
-        this.entries.add(placeFig);
-    }
-
-    public ArrayList<Entry> getEvents(int count) {
-        ArrayList<Entry> res = new ArrayList<>(3);
+    public static ArrayList<Entry> getEvents(int count) {
+        ArrayList<Entry> res = new ArrayList<>(count);
         int added =0;
         Collections.reverse(entries);
         for (Entry e: entries){
-            if(added ==3) break;
+            if(added ==count) break;
             if(e!=null){
                 res.add(e);
                 added++;

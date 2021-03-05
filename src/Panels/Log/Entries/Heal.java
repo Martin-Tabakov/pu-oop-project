@@ -1,4 +1,4 @@
-package Panels.Log;
+package Panels.Log.Entries;
 
 import Figure.Figure;
 import Team.Side;

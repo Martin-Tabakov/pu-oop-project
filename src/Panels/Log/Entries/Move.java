@@ -1,4 +1,4 @@
-package Panels.Log;
+package Panels.Log.Entries;
 
 import Figure.Figure;
 import Team.Side;
@@ -11,9 +11,8 @@ public class Move extends Entry {
         super(turn, perpetrator, figure);
         this.newSpot = newSpot;
     }
-
     @Override
     public String toString() {
-        return String.format("Turn %d: %s %s moved to %s", turn, perpetrator, figure, newSpot);
+        return String.format("Turn %d: %s %s moved to %s", turn, perpetrator, figure.getSymbols(), newSpot);
     }
 }
