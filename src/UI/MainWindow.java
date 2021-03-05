@@ -4,10 +4,7 @@ import Panels.ActionMenu.ActionMenu;
 import Panels.Board.*;
 import Panels.FigureHolder.FigureHolder;
 import Figure.Figure;
-import Panels.Log.Entries.Heal;
 import Panels.Log.Log;
-import Panels.Log.Entries.Move;
-import Panels.Log.Entries.PlaceFig;
 import Panels.PointsDisplay.PointsDisplay;
 import Team.*;
 import Utility.*;
@@ -40,6 +37,11 @@ public class MainWindow extends JFrame implements MouseListener {
     boolean isNorthPlacing = true;
     boolean bothPlayersPlaced = false;
 
+    /**
+     * Constructor for the frame, where the game will be played
+     * @param height height of the game board measured in tiles
+     * @param width width of the game board measured in tiles
+     */
     public MainWindow(int height, int width) {
         this.north = new Team(Side.North);
         this.north.setPlaceableTiles(width, height);
@@ -64,6 +66,11 @@ public class MainWindow extends JFrame implements MouseListener {
         this.setVisible(true);
     }
 
+    /**
+     * Used for visualization of all graphic elements
+     * @param g Graphic component g
+     *
+     */
     public void paint(Graphics g) {
         super.paint(g);
         draw.setGraphic(g);
@@ -85,6 +92,21 @@ public class MainWindow extends JFrame implements MouseListener {
     }
 
     //region Figure placement phase
+
+    /**
+     * Method that executes the stage of the game where the players place their figures on the board.
+     * Switches between a player selecting a figure and placing it on the board.
+     * Afterwards the other player does the same until all figures have been placed on the board
+     */
+    private void figurePlacing() {
+        if (figData != null) placeFigure();
+        if (figData == null) figData = getFigureToPlace();
+    }
+
+    /**
+     * Executes when a player has to select a figure from the figure holder panel so it can be placed on the game board
+     * @return The player selected figure, and the times its type has been placed on the game board
+     */
     public Pair<Figure, Integer> getFigureToPlace() {
         boolean isNorthFull = north.getFigures().size() == north.getTotalFigures();
         boolean isSouthFull = south.getFigures().size() == south.getTotalFigures();
@@ -97,20 +119,23 @@ public class MainWindow extends JFrame implements MouseListener {
 
         ArrayList<Pair<Figure, Integer>> totals = figureHolder.getPlacedFigures();
         for (int i = 0; i < 3; i++) {
-            if (Spot.areValuesEqual(totals.get(i).getKey().getPlacement(), clickfh) && totals.get(i).getValue() < 2) {
+            if (Spot.areValuesEqual(totals.get(i).getKey().getPlace(), clickfh) && totals.get(i).getValue() < 2) {
                 toReturn = totals.get(i);
-                System.out.println("Clicked on valid option" + totals.get(i).getKey().getSymbols());
+                System.out.println("Clicked on valid option " + totals.get(i).getKey().getSymbols());
             }
         }
         return toReturn;
     }
 
+    /**
+     * Method that is called after a figure has been selected to to be placed.
+     * Places the figure if the player has selected a valid tile for the figure
+     */
     private void placeFigure() {
         for (Spot p : currentPlayer.getPlaceableTiles()) {
             if (p.hasEqualValues(clickb)) {
                 currentPlayer.addFig(clickb, figData, p);
                 board.getTile(clickb.getHeight(), clickb.getWidth()).setPlacedFig(figData.getKey());
-                Log.addEntry(new PlaceFig(Log.getRounds(), currentPlayer.getSide(), figData.getKey()));
                 isNorthPlacing = !isNorthPlacing;
                 figData = null;
                 return;
@@ -118,16 +143,15 @@ public class MainWindow extends JFrame implements MouseListener {
         }
     }
 
-    private void figurePlacing() {
-        if (figData != null) placeFigure();
-        if (figData == null) figData = getFigureToPlace();
-    }
-
     //endregion
     String selectedAction = null;
 
+    /**
+     * Executed at the stage of the game where the two players are fighting against each other.
+     * Switches between a player selecting an action and executing that same action.
+     * Afterwards the other player does the same until one of the players is left without figures
+     */
     private void playGame() {
-
         if (selectedAction == null) {
             selectedAction = actionMenu.getAction(clickam);
             return;
@@ -136,53 +160,74 @@ public class MainWindow extends JFrame implements MouseListener {
     }
 
     Figure doer = null;
+
+    /**
+     * Executes an action that the player has selected from the action menu
+     */
     private void doAction() {
         if (doer == null) {
             doer = currentPlayer.getFigureOnPos(clickb);
         }
         if (doer != null) switch (selectedAction) {
-            case "Attack": {
-                if (currentPlayer.attackFig(doer, clickb, board, waitingPlayer)) {
-
-                    currentPlayer.resetAttackablePlaces();
-                    currentPlayer.markTargets = false;
-                    prepareNextAction();
-                    changeCurrentPlayer();
-                }
-                if(currentPlayer.markTargets && currentPlayer.getAttackablePlaces().size() == 0){
-                    currentPlayer.resetAttackablePlaces();
-                    currentPlayer.markTargets = false;
-                    System.out.println("No possible targets!");
-                    prepareNextAction();
-                }
-                break;
-            }
-            case "Move": {
-                if (currentPlayer.moveFig(doer, clickb, board)) {
-                    Spot initialSpot = currentPlayer.getVisitedPlaces().getFirst().getKey();
-                    board.getTile(initialSpot.getHeight(), initialSpot.getWidth()).setPlacedFig(null);
-                    board.getTile(clickb.getHeight(), clickb.getWidth()).setPlacedFig(doer);
-                    currentPlayer.resetVisited();
-                    prepareNextAction();
-                    changeCurrentPlayer();
-                }
-                break;
-            }
-            case "Heal": {
-                int healthRegen = Dice.throwDice(1, 6);
-                if (currentPlayer.healFig(doer, healthRegen))
-                    if (Dice.throwDice(2,4) % 2 == 0) changeCurrentPlayer();
-                prepareNextAction();
-                break;
-            }
+            case "Attack" -> executeAttack();
+            case "Move" -> executeMove();
+            case "Heal" -> executeHeal();
         }
     }
 
+    /**
+     * Executes an attack action, where one figure attacks another enemy figure or an obstacle tile
+     */
+    private void executeAttack(){
+        if (currentPlayer.attackFig(doer, clickb, board, waitingPlayer)) {
+            currentPlayer.resetAttackablePlaces();
+            currentPlayer.markTargets = false;
+            prepareNextAction();
+            changeCurrentPlayer();
+        }
+        if (currentPlayer.markTargets && currentPlayer.getAttackablePlaces().size() == 0) {
+            currentPlayer.resetAttackablePlaces();
+            currentPlayer.markTargets = false;
+            System.out.println("No possible targets!");
+            prepareNextAction();
+        }
+    }
+
+    /**
+     * Executes a movement for a figure to another tile if the tile is valid
+     */
+    private void executeMove(){
+        if (currentPlayer.moveFig(doer, clickb, board)) {
+            Spot initialSpot = currentPlayer.getVisitedPlaces().getFirst().getKey();
+            board.getTile(initialSpot.getHeight(), initialSpot.getWidth()).setPlacedFig(null);
+            board.getTile(clickb.getHeight(), clickb.getWidth()).setPlacedFig(doer);
+            currentPlayer.resetVisited();
+            prepareNextAction();
+            changeCurrentPlayer();
+        }
+    }
+
+    /**
+     * Executes a heal for a figure if its health is below its maximum health
+     */
+    private void executeHeal(){
+        int healthRegen = Dice.throwDice(1, 6);
+        if (currentPlayer.healFig(doer, healthRegen))
+            if (Dice.throwDice(2, 4) % 2 == 0) changeCurrentPlayer();
+        prepareNextAction();
+    }
+
+    /**
+     * Clears the selected action so another action can be chosen
+     */
     private void prepareNextAction() {
         selectedAction = null;
         doer = null;
     }
 
+    /**
+     * Switches the current and waiting player and counts a round
+     */
     private void changeCurrentPlayer() {
         isNorthPlacing = !isNorthPlacing;
         currentPlayer = (isNorthPlacing) ? north : south;
@@ -204,10 +249,6 @@ public class MainWindow extends JFrame implements MouseListener {
         Spot amNormalized = actionMenu.normalizePlace(new Spot(e.getY(), e.getX()));
 
         System.out.printf("Click x: %d y: %d\n", e.getX(), e.getY());
-
-        System.out.println("fhNormalized = " + fhNormalized);
-        System.out.println("gbNormalized = " + gbNormalized);
-        System.out.println("amNormalized = " + amNormalized);
 
         clickfh = Spot.convertToPos(fhNormalized);
         clickb = Spot.convertToPos(gbNormalized);
