@@ -1,6 +1,6 @@
 package Panels.Log.Entries;
 
-public enum LogType {
+public enum EntryType {
     Attack,
     Death,
     Heal,

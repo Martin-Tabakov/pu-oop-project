@@ -66,6 +66,9 @@ public class Log extends Panel {
         return res;
     }
 
+    /**
+     * Resets all variables to initial values
+     */
     public static void reset() {
         entries = new ArrayList<>();
         fullRound = true;

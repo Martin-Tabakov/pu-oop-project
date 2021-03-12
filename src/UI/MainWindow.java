@@ -144,7 +144,6 @@ public class MainWindow extends JFrame implements MouseListener {
         for (int i = 0; i < 3; i++) {
             if (Spot.areValuesEqual(totals.get(i).getKey().getPlace(), clickfh) && totals.get(i).getValue() < 2) {
                 toReturn = totals.get(i);
-                System.out.println("Clicked on valid option " + totals.get(i).getKey().getSymbols());
             }
         }
         return toReturn;
@@ -213,7 +212,6 @@ public class MainWindow extends JFrame implements MouseListener {
         if (currentPlayer.markTargets && currentPlayer.getAttackablePlaces().size() == 0) {
             currentPlayer.resetAttackablePlaces();
             currentPlayer.markTargets = false;
-            System.out.println("No possible targets!");
             prepareNextAction();
         }
     }
@@ -263,9 +261,11 @@ public class MainWindow extends JFrame implements MouseListener {
 
     //region Game ended
 
+    /**
+     * Called when the game has ended. If the area of the New Game button is pressed.
+     * A new game will start on new window and current window will close
+     */
     private void completeGame() {
-        //Check if the player clicks on the button, starting a new game
-        //endGameDisplay.setData(north.getPoints(),south.getPoints());
         if (clickegp.getHeight() == 5 && clickegp.getWidth() >= 3 && clickegp.getWidth() <= 5) {
             this.dispose();
             new MainWindow(height, width);

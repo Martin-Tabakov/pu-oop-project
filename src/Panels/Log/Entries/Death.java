@@ -5,7 +5,7 @@ import Team.Side;
 
 public class Death extends Entry {
     public Death(int turn, Side perpetrator, Figure figure) {
-        super(turn, perpetrator, figure,LogType.Death);
+        super(turn, perpetrator, figure, EntryType.Death);
     }
 
     @Override

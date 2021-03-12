@@ -7,7 +7,7 @@ public class Heal extends Entry {
     int currentHP;
 
     public Heal(int turn, Side perpetrator, Figure figure, int currentHP) {
-        super(turn, perpetrator, figure,LogType.Heal);
+        super(turn, perpetrator, figure, EntryType.Heal);
         this.currentHP = currentHP;
     }
 

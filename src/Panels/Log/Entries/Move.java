@@ -8,7 +8,7 @@ public class Move extends Entry {
     Spot newSpot;
 
     public Move(int turn, Side perpetrator, Figure figure, Spot newSpot) {
-        super(turn, perpetrator, figure,LogType.Move);
+        super(turn, perpetrator, figure, EntryType.Move);
         this.newSpot = newSpot;
     }
     @Override

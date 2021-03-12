@@ -104,7 +104,6 @@ public class Team {
         placeableTiles.remove(toRemove);
         Figure f = figData.getKey();
         f.setPlacement(click);
-        System.out.println(f);
         figures.add(f);
     }
 

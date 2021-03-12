@@ -2,7 +2,7 @@ package Panels;
 
 import Figure.Figure;
 import Panels.Log.Entries.Entry;
-import Panels.Log.Entries.LogType;
+import Panels.Log.Entries.EntryType;
 import Panels.Log.Log;
 import Team.Side;
 import Utility.Spot;
@@ -47,6 +47,11 @@ public class EndGameDisplay extends Panel{
         super(position, size);
     }
 
+    /**
+     * Sets the data that will be shown after the game ends
+     * @param northPoints Points accumulated by the north team
+     * @param southPoints Points accumulated by the south team
+     */
     public void setData(int northPoints,int southPoints){
             totalRounds = Log.getRounds();
             this.northPoints = northPoints;
@@ -55,10 +60,15 @@ public class EndGameDisplay extends Panel{
             this.southDeaths = getDiedFigures(Side.South);
     }
 
+    /**
+     * Returns all Figures for a nation that have died in chronological order
+     * @param side Side
+     * @return ArrayList<Figure>
+     */
     private ArrayList<Figure> getDiedFigures(Side side){
         ArrayList<Figure> toReturn = new ArrayList<>();
         for(Entry e: Log.getEntries())
-        if(e.getPerpetrator().equals(side) && e.getLogType().equals(LogType.Death))
+        if(e.getPerpetrator().equals(side) && e.getLogType().equals(EntryType.Death))
             toReturn.add(e.getFigure());
         return toReturn;
     }

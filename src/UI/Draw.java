@@ -261,6 +261,11 @@ public class Draw {
         }
     }
 
+    /**
+     * Draws the panel when the game ends
+     *
+     * @param egd EndGameDisplay
+     */
     public void drawEndGameDisplay(EndGameDisplay egd) {
         g.setColor(getTileColor(Type.Castle2));
         g.fillRect(egd.getPixelPosW(), egd.getPixelPosW(), egd.getPixelW(), egd.getPixelH());
@@ -275,55 +280,79 @@ public class Draw {
         drawTopMessage(egd);
     }
 
+    /**
+     * Draws the died figures in chronological order from left to right for a nation
+     *
+     * @param egd     EndGameDisplay
+     * @param place   Starting position for the strings
+     * @param side    The side to which the figures belong
+     * @param figures List of died figures
+     */
     private void drawDiedFigures(EndGameDisplay egd, Spot place, Side side, ArrayList<Figure> figures) {
         g.setColor(getNationCol(side));
-        g.drawString("Deaths", egd.getPixelPosW() + 10, egd.getPixelPosH() + (int) (Tile.height / 1.5)+Tile.height*place.getHeight());
+        g.drawString("Deaths", egd.getPixelPosW() + 10, egd.getPixelPosH() + (int) (Tile.height / 1.5) + Tile.height * place.getHeight());
 
         for (int i = 0; i < figures.size(); i++) {
             int coordX = Tile.width * (i + place.getWidth()) + Tile.width / 3 + egd.getPixelPosW();
             int coordY = Tile.height * place.getHeight() + (int) (Tile.height / 1.5) + egd.getPixelPosH();
-
-            g.setColor(getNationCol(side));
             g.drawString(figures.get(i).getSymbols(), coordX, coordY);
         }
     }
 
+    /**
+     * Draws the button, allowing a new game to start
+     * @param egd EndGameDisplay
+     */
     private void drawResetButton(EndGameDisplay egd) {
-        g.setColor(getTileColor(Type.Castle));
         int coordX = egd.getPixelPosW() + Tile.width * 3;
-        int coordY = egd.getPixelPosH() + egd.getPixelH()-Tile.height ;
+        int coordY = egd.getPixelPosH() + egd.getPixelH() - Tile.height;
+
+        g.setColor(getTileColor(Type.Castle));
         g.fillRect(coordX, coordY, Tile.width * 3, Tile.height);
         g.setColor(getTileColor(Type.Castle2));
-
-        g.drawString("New Game", coordX+ Tile.width / 4, coordY+ (int) (Tile.height / 1.5));
+        g.drawString("New Game", coordX + Tile.width / 4, coordY + (int) (Tile.height / 1.5));
     }
+
+    /**
+     * Draws Game Over on top of the Window
+     * @param egd EndGameDisplay
+     */
     private void drawTopMessage(EndGameDisplay egd) {
         int coordX = egd.getPixelPosW() + Tile.width * 2;
         int coordY = egd.getPixelPosH() - Tile.height;
-        g.setColor(getTileColor(Type.Castle));
 
-        g.drawString("Game Over", coordX+ Tile.width / 4 + egd.getPixelPosW(), coordY+ (int) (Tile.height / 1.5) + egd.getPixelPosH());
+        g.setColor(getTileColor(Type.Castle));
+        g.drawString("Game Over", coordX + Tile.width / 4 + egd.getPixelPosW(), coordY + (int) (Tile.height / 1.5) + egd.getPixelPosH());
     }
 
+    /**
+     * Draws the points for both teams
+     * @param egd EndGameDisplay
+     */
     private void drawPoints(EndGameDisplay egd) {
         int coordX = egd.getPixelPosW() + 10;
-        int coordY = egd.getPixelPosH() + (int) (Tile.height / 1.5)+Tile.height;
+        int coordY = egd.getPixelPosH() + (int) (Tile.height / 1.5) + Tile.height;
+
         g.setColor(getTileColor(Type.Castle));
-        g.drawString("Points",coordX,coordY);
+        g.drawString("Points", coordX, coordY);
         g.setColor(getNationCol(Side.North));
-        g.drawString(String.valueOf(egd.getNorthPoints()),coordX + Tile.width*2 ,coordY);
+        g.drawString(String.valueOf(egd.getNorthPoints()), coordX + Tile.width * 2, coordY);
         g.setColor(getNationCol(Side.South));
-        g.drawString(String.valueOf(egd.getSouthPoints()),coordX + Tile.width*3, coordY);
+        g.drawString(String.valueOf(egd.getSouthPoints()), coordX + Tile.width * 3, coordY);
     }
 
+    /**
+     * Draws the total rounds played in the game
+     * @param egd EndGameDisplay
+     */
     private void drawRounds(EndGameDisplay egd) {
-        int coordX =  egd.getPixelPosW() + 10;
-        int coordY =  egd.getPixelPosH() + (int) (Tile.height / 1.5)+ Tile.height*2;
+        int coordX = egd.getPixelPosW() + 10;
+        int coordY = egd.getPixelPosH() + (int) (Tile.height / 1.5) + Tile.height * 2;
 
         g.setColor(getTileColor(Type.Castle));
-        g.drawString("Rounds",coordX,coordY);
+        g.drawString("Rounds", coordX, coordY);
         g.setColor(getTileColor(Type.Obstacle));
-        g.drawString(String.valueOf(egd.getTotalRounds()),coordX + Tile.width * 2,coordY  );
+        g.drawString(String.valueOf(egd.getTotalRounds()), coordX + Tile.width * 2, coordY);
     }
 
 }

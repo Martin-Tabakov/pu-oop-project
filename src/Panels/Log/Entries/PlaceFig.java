@@ -5,7 +5,7 @@ import Team.Side;
 
 public class PlaceFig extends Entry{
     public PlaceFig(int turn, Side perpetrator, Figure figure) {
-        super(turn, perpetrator, figure,LogType.PlaceFigure);
+        super(turn, perpetrator, figure, EntryType.PlaceFigure);
     }
     @Override
     public String toString() {
