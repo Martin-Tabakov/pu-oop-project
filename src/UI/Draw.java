@@ -3,6 +3,7 @@ package UI;
 import Panels.ActionMenu.ActionMenu;
 import Panels.Board.*;
 import Figure.*;
+import Panels.EndGameDisplay;
 import Panels.FigureHolder.FigureHolder;
 import Panels.Log.Entries.Entry;
 import Panels.Log.Log;
@@ -161,8 +162,9 @@ public class Draw {
 
     /**
      * Fills a tile with a specific types color
-     * @param p Position of the tile
-     * @param t Type of the tile
+     *
+     * @param p        Position of the tile
+     * @param t        Type of the tile
      * @param panelPos The position of the panel where the tile will be drawn
      */
     private void drawTile(Spot p, Type t, Spot panelPos) {
@@ -175,6 +177,7 @@ public class Draw {
 
     /**
      * Draws a log window
+     *
      * @param log Log window
      */
     public void drawLogWindow(Log log) {
@@ -199,7 +202,8 @@ public class Draw {
 
     /**
      * Draws an action menu window
-     * @param am ActionMenu
+     *
+     * @param am   ActionMenu
      * @param side The side of the current player
      */
     public void drawActionMenu(ActionMenu am, Side side) {
@@ -215,7 +219,8 @@ public class Draw {
 
     /**
      * Draws the available places where a figure can move to
-     * @param spots List of available places
+     *
+     * @param spots    List of available places
      * @param panelPos The position of the panel where the tile will be drawn
      */
     public void drawMoveToPlaces(LinkedList<Pair<Spot, Integer>> spots, Spot panelPos) {
@@ -226,8 +231,9 @@ public class Draw {
 
     /**
      * Draws the panel where the points for both teams are shown
+     *
      * @param pd PointsDisplay
-     * @param t Team north
+     * @param t  Team north
      * @param t2 Team south
      */
     public void drawPointsDisplay(PointsDisplay pd, Team t, Team t2) {
@@ -245,12 +251,79 @@ public class Draw {
 
     /**
      * Draws the places where a figure can execute an attack
+     *
      * @param attackablePlaces List of attackable places
-     * @param panelPos The position of the panel where the tile will be drawn
+     * @param panelPos         The position of the panel where the tile will be drawn
      */
     public void drawAttackablePlaces(ArrayList<Spot> attackablePlaces, Spot panelPos) {
         for (Spot s : attackablePlaces) {
             drawTile(s, Type.Placeable, panelPos);
         }
     }
+
+    public void drawEndGameDisplay(EndGameDisplay egd) {
+        g.setColor(getTileColor(Type.Castle2));
+        g.fillRect(egd.getPixelPosW(), egd.getPixelPosW(), egd.getPixelW(), egd.getPixelH());
+        g.setColor(getTileColor(Type.Castle));
+        g.drawRect(egd.getPixelPosW(), egd.getPixelPosH(), egd.getPixelW(), egd.getPixelH());
+
+        drawDiedFigures(egd, new Spot(3, 2), Side.North, egd.getNorthDeaths());
+        drawDiedFigures(egd, new Spot(4, 2), Side.South, egd.getSouthDeaths());
+        drawResetButton(egd);
+        drawPoints(egd);
+        drawRounds(egd);
+        drawTopMessage(egd);
+    }
+
+    private void drawDiedFigures(EndGameDisplay egd, Spot place, Side side, ArrayList<Figure> figures) {
+        g.setColor(getNationCol(side));
+        g.drawString("Deaths", egd.getPixelPosW() + 10, egd.getPixelPosH() + (int) (Tile.height / 1.5)+Tile.height*place.getHeight());
+
+        for (int i = 0; i < figures.size(); i++) {
+            int coordX = Tile.width * (i + place.getWidth()) + Tile.width / 3 + egd.getPixelPosW();
+            int coordY = Tile.height * place.getHeight() + (int) (Tile.height / 1.5) + egd.getPixelPosH();
+
+            g.setColor(getNationCol(side));
+            g.drawString(figures.get(i).getSymbols(), coordX, coordY);
+        }
+    }
+
+    private void drawResetButton(EndGameDisplay egd) {
+        g.setColor(getTileColor(Type.Castle));
+        int coordX = egd.getPixelPosW() + Tile.width * 3;
+        int coordY = egd.getPixelPosH() + egd.getPixelH()-Tile.height ;
+        g.fillRect(coordX, coordY, Tile.width * 3, Tile.height);
+        g.setColor(getTileColor(Type.Castle2));
+
+        g.drawString("New Game", coordX+ Tile.width / 4, coordY+ (int) (Tile.height / 1.5));
+    }
+    private void drawTopMessage(EndGameDisplay egd) {
+        int coordX = egd.getPixelPosW() + Tile.width * 2;
+        int coordY = egd.getPixelPosH() - Tile.height;
+        g.setColor(getTileColor(Type.Castle));
+
+        g.drawString("Game Over", coordX+ Tile.width / 4 + egd.getPixelPosW(), coordY+ (int) (Tile.height / 1.5) + egd.getPixelPosH());
+    }
+
+    private void drawPoints(EndGameDisplay egd) {
+        int coordX = egd.getPixelPosW() + 10;
+        int coordY = egd.getPixelPosH() + (int) (Tile.height / 1.5)+Tile.height;
+        g.setColor(getTileColor(Type.Castle));
+        g.drawString("Points",coordX,coordY);
+        g.setColor(getNationCol(Side.North));
+        g.drawString(String.valueOf(egd.getNorthPoints()),coordX + Tile.width*2 ,coordY);
+        g.setColor(getNationCol(Side.South));
+        g.drawString(String.valueOf(egd.getSouthPoints()),coordX + Tile.width*3, coordY);
+    }
+
+    private void drawRounds(EndGameDisplay egd) {
+        int coordX =  egd.getPixelPosW() + 10;
+        int coordY =  egd.getPixelPosH() + (int) (Tile.height / 1.5)+ Tile.height*2;
+
+        g.setColor(getTileColor(Type.Castle));
+        g.drawString("Rounds",coordX,coordY);
+        g.setColor(getTileColor(Type.Obstacle));
+        g.drawString(String.valueOf(egd.getTotalRounds()),coordX + Tile.width * 2,coordY  );
+    }
+
 }

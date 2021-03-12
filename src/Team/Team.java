@@ -302,6 +302,7 @@ public class Team {
     }
 
     LinkedList<Pair<Spot, Integer>> visitedPlaces = null;
+    public Pair<Spot, Integer> figureStandingPlace = null;
 
     /**
      * Fills the Linked list with the spots where the figure can move to with its distance from the figure
@@ -310,7 +311,6 @@ public class Team {
      * @param board Game board
      */
     public void fillVisitedPlaces(Figure f, Board board) {
-        //TODO 4 Exclude the tile where the figure is standing as a valid tile to move to
         Queue<Pair<Spot, Integer>> toVisit = new LinkedList<>();
         visitedPlaces = new LinkedList<>();
         toVisit.add(new Pair<>(f.getPlace(), 1));
@@ -322,6 +322,8 @@ public class Team {
         neighbors.add(new Spot(0, -1));
 
         traverseNeighbours(toVisit, neighbors, board, f);
+        figureStandingPlace = visitedPlaces.getFirst();
+        visitedPlaces.removeFirst();
     }
 
     /**

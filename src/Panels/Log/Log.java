@@ -11,7 +11,11 @@ public class Log extends Panel {
 
     private static int rounds = 1;
     private static boolean fullRound = true;
-    private static final ArrayList<Entry> entries = new ArrayList<>();
+    private static ArrayList<Entry> entries = new ArrayList<>();
+
+    public static ArrayList<Entry> getEntries() {
+        return entries;
+    }
 
     public Log(Spot spot, Spot size) {
         super(spot, size);
@@ -60,5 +64,12 @@ public class Log extends Panel {
         }
         Collections.reverse(entries);
         return res;
+    }
+
+    public static void reset() {
+        entries = new ArrayList<>();
+        fullRound = true;
+        rounds = 1;
+
     }
 }

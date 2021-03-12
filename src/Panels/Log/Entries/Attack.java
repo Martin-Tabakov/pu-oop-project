@@ -7,7 +7,7 @@ public class Attack extends Entry {
     Figure victim;
 
     public Attack(int turn, Side perpetrator, Figure attacker, Figure victim) {
-        super(turn, perpetrator, attacker);
+        super(turn, perpetrator, attacker,LogType.Attack);
         this.victim = victim;
     }
 

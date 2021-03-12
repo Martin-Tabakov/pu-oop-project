@@ -2,6 +2,7 @@ package UI;
 
 import Panels.ActionMenu.ActionMenu;
 import Panels.Board.*;
+import Panels.EndGameDisplay;
 import Panels.FigureHolder.FigureHolder;
 import Figure.Figure;
 import Panels.Log.Log;
@@ -28,21 +29,30 @@ public class MainWindow extends JFrame implements MouseListener {
     ActionMenu actionMenu;
     Log log;
     PointsDisplay pointsDisplay;
+    EndGameDisplay endGameDisplay;
 
     Spot clickfh = null;
     Spot clickb = null;
     Spot clickam = null;
+    Spot clickegp = null;
     Pair<Figure, Integer> figData = null;
 
     boolean isNorthPlacing = true;
     boolean bothPlayersPlaced = false;
+    int height;
+    int width;
+
+    GameState gameState = GameState.Preparation;
 
     /**
      * Constructor for the frame, where the game will be played
+     *
      * @param height height of the game board measured in tiles
-     * @param width width of the game board measured in tiles
+     * @param width  width of the game board measured in tiles
      */
     public MainWindow(int height, int width) {
+        this.height = height;
+        this.width = width;
         this.north = new Team(Side.North);
         this.north.setPlaceableTiles(width, height);
         this.south = new Team(Side.South);
@@ -50,17 +60,16 @@ public class MainWindow extends JFrame implements MouseListener {
         this.currentPlayer = this.north;
         this.waitingPlayer = this.south;
 
-        int windowWidth = (width + 8) * Tile.width;
-        int windowHeight = (height + 2) * Tile.height;
-
         this.board = new Board(new Spot(1, 1), new Spot(height, width));
         this.figureHolder = new FigureHolder(new Spot(1, width + 2), new Spot(2, 3), north);
         this.actionMenu = new ActionMenu(new Spot(1, width + 2), new Spot(3, 2));
         this.log = new Log(new Spot(height - 2, width + 2), new Spot(3, 5));
         this.pointsDisplay = new PointsDisplay(new Spot(1, width + 5), new Spot(3, 2));
+        this.endGameDisplay = new EndGameDisplay(new Spot(1, 1), new Spot(height - 1, width));
 
+        Log.reset();
         this.draw = new Draw();
-        this.setSize(windowWidth, windowHeight);
+        this.setSize((width + 8) * Tile.width, (height + 2) * Tile.height);
         this.setDefaultCloseOperation(EXIT_ON_CLOSE);
         this.addMouseListener(this);
         this.setVisible(true);
@@ -68,26 +77,39 @@ public class MainWindow extends JFrame implements MouseListener {
 
     /**
      * Used for visualization of all graphic elements
-     * @param g Graphic component g
      *
+     * @param g Graphic component g
      */
     public void paint(Graphics g) {
         super.paint(g);
         draw.setGraphic(g);
-        draw.drawBoard(board);
-        draw.drawTeam(north, board.getPosition());
-        draw.drawTeam(south, board.getPosition());
-        draw.drawLogWindow(log);
 
-        if (currentPlayer.getVisitedPlaces() != null)
-            draw.drawMoveToPlaces(currentPlayer.getVisitedPlaces(), board.getPosition());
-        if (currentPlayer.getAttackablePlaces() != null)
-            draw.drawAttackablePlaces(currentPlayer.getAttackablePlaces(), board.getPosition());
+        switch (gameState) {
+            case Preparation -> {
+                draw.drawBoard(board);
+                draw.drawTeam(north, board.getPosition());
+                draw.drawTeam(south, board.getPosition());
+                draw.drawLogWindow(log);
+                draw.drawFigureHolder(figureHolder, board.getPosition());
+            }
+            case Playing -> {
+                draw.drawBoard(board);
+                draw.drawTeam(north, board.getPosition());
+                draw.drawTeam(south, board.getPosition());
+                draw.drawLogWindow(log);
+                if (currentPlayer.getVisitedPlaces() != null)
+                    draw.drawMoveToPlaces(currentPlayer.getVisitedPlaces(), board.getPosition());
+                if (currentPlayer.getAttackablePlaces() != null)
+                    draw.drawAttackablePlaces(currentPlayer.getAttackablePlaces(), board.getPosition());
 
-        if (!bothPlayersPlaced) draw.drawFigureHolder(figureHolder, board.getPosition());
-        else {
-            draw.drawActionMenu(actionMenu, currentPlayer.getSide());
-            draw.drawPointsDisplay(pointsDisplay, north, south);
+                draw.drawActionMenu(actionMenu, currentPlayer.getSide());
+                draw.drawPointsDisplay(pointsDisplay, north, south);
+            }
+            case End -> {
+                this.setSize((width+2)*Tile.width,(height+1)*Tile.height);
+                draw.drawEndGameDisplay(endGameDisplay);
+            }
+
         }
     }
 
@@ -105,6 +127,7 @@ public class MainWindow extends JFrame implements MouseListener {
 
     /**
      * Executes when a player has to select a figure from the figure holder panel so it can be placed on the game board
+     *
      * @return The player selected figure, and the times its type has been placed on the game board
      */
     public Pair<Figure, Integer> getFigureToPlace() {
@@ -144,6 +167,8 @@ public class MainWindow extends JFrame implements MouseListener {
     }
 
     //endregion
+
+    //region Game in progress
     String selectedAction = null;
 
     /**
@@ -178,7 +203,7 @@ public class MainWindow extends JFrame implements MouseListener {
     /**
      * Executes an attack action, where one figure attacks another enemy figure or an obstacle tile
      */
-    private void executeAttack(){
+    private void executeAttack() {
         if (currentPlayer.attackFig(doer, clickb, board, waitingPlayer)) {
             currentPlayer.resetAttackablePlaces();
             currentPlayer.markTargets = false;
@@ -196,9 +221,9 @@ public class MainWindow extends JFrame implements MouseListener {
     /**
      * Executes a movement for a figure to another tile if the tile is valid
      */
-    private void executeMove(){
+    private void executeMove() {
         if (currentPlayer.moveFig(doer, clickb, board)) {
-            Spot initialSpot = currentPlayer.getVisitedPlaces().getFirst().getKey();
+            Spot initialSpot = currentPlayer.figureStandingPlace.getKey();
             board.getTile(initialSpot.getHeight(), initialSpot.getWidth()).setPlacedFig(null);
             board.getTile(clickb.getHeight(), clickb.getWidth()).setPlacedFig(doer);
             currentPlayer.resetVisited();
@@ -210,7 +235,7 @@ public class MainWindow extends JFrame implements MouseListener {
     /**
      * Executes a heal for a figure if its health is below its maximum health
      */
-    private void executeHeal(){
+    private void executeHeal() {
         int healthRegen = Dice.throwDice(1, 6);
         if (currentPlayer.healFig(doer, healthRegen))
             if (Dice.throwDice(2, 4) % 2 == 0) changeCurrentPlayer();
@@ -234,6 +259,20 @@ public class MainWindow extends JFrame implements MouseListener {
         waitingPlayer = (!isNorthPlacing) ? north : south;
         Log.countRound();
     }
+    //endregion
+
+    //region Game ended
+
+    private void completeGame() {
+        //Check if the player clicks on the button, starting a new game
+        //endGameDisplay.setData(north.getPoints(),south.getPoints());
+        if (clickegp.getHeight() == 5 && clickegp.getWidth() >= 3 && clickegp.getWidth() <= 5) {
+            this.dispose();
+            new MainWindow(height, width);
+        }
+    }
+
+    //endregion
 
     /**
      * Invoked when the mouse button has been clicked (pressed
@@ -247,21 +286,35 @@ public class MainWindow extends JFrame implements MouseListener {
         Spot fhNormalized = figureHolder.normalizePlace(new Spot(e.getY(), e.getX()));
         Spot gbNormalized = board.normalizePlace(new Spot(e.getY(), e.getX()));
         Spot amNormalized = actionMenu.normalizePlace(new Spot(e.getY(), e.getX()));
-
-        System.out.printf("Click x: %d y: %d\n", e.getX(), e.getY());
+        Spot egpNormalized = endGameDisplay.normalizePlace(new Spot(e.getY(), e.getX()));
 
         clickfh = Spot.convertToPos(fhNormalized);
         clickb = Spot.convertToPos(gbNormalized);
         clickam = Spot.convertToPos(amNormalized);
+        clickegp = Spot.convertToPos(egpNormalized);
 
-        System.out.println("Clicked fh= " + clickfh);
-        System.out.println("Clicked gb= " + clickb);
-        System.out.println("Clicked am= " + clickam);
+        switch (gameState) {
+            case Preparation -> figurePlacing();
+            case Playing -> playGame();
+            case End -> completeGame();
+        }
+        gameState = setState();
 
-        if (!bothPlayersPlaced) figurePlacing();
-        if (bothPlayersPlaced) playGame();
-
+        endGameDisplay.setData(north.getPoints(), south.getPoints());
         repaint();
+    }
+
+    private GameState setState() {
+        if (!bothPlayersPlaced) return GameState.Preparation;
+        if (currentPlayer.getFigures().size() == 0 || waitingPlayer.getFigures().size() == 0) return GameState.End;
+        if (bothPlayersPlaced) return GameState.Playing;
+        return null;
+    }
+
+    enum GameState {
+        Preparation,
+        Playing,
+        End
     }
     //region Unused mouse events
 
